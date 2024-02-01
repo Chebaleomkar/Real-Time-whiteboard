@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket.io Canvas</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"
+        integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4"
+        crossorigin="anonymous"></script>
+</head>
+
+
+<body>
+
+    <h1>Real Time : WhiteBoard </h1>
+    <div id="can">
+        <canvas id="canvas" width="400" height="500" style="border: 2px solid black;"></canvas>
+    </div>
+
+    <script>
+        var socket = io();
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let mouseDown = false;
+        var x, y;
+
+        canvas.onmousedown = (e) => {
+            ctx.beginPath();
+            mouseDown = true;
+            x = e.clientX - canvas.getBoundingClientRect().left;
+            y = e.clientY - canvas.getBoundingClientRect().top;
+            socket.emit('down', { x, y });
+        }
+
+        socket.on('ondown', (data) => {
+            ctx.moveTo(data.x, data.y);
+        });
+
+        canvas.onmouseup = (e) => {
+            mouseDown = false;
+        }
+
+        canvas.onmousemove = (e) => {
+            if (mouseDown) {
+                x = e.clientX - canvas.getBoundingClientRect().left;
+                y = e.clientY - canvas.getBoundingClientRect().top;
+
+                // Move ctx.moveTo here
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                socket.emit('draw', { x, y });
+            }
+        }
+
+        socket.emit('draw', { x, y });
+
+        socket.on('ondraw', (data) => {
+            ctx.lineTo(data.x, data.y);
+            ctx.stroke();
+        })
+
+    </script>
+</body>
+
+</html>
