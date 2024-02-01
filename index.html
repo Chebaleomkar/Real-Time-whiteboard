@@ -19,7 +19,7 @@
     </div>
 
     <script>
-        var socket = io();
+        var socket = io('https://real-time-whiteboard-liart.vercel.app/');
         let canvas = document.getElementById('canvas');
         let ctx = canvas.getContext('2d');
         let mouseDown = false;
